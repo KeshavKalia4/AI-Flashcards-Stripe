@@ -27,6 +27,12 @@ export default function Generate() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const { isLoaded, userId, sessionId, getToken } = useAuth()
 
+  const handleFlip = (index) => {
+    const allFlashcards = [...flashcards]
+    allFlashcards[index].flip = !allFlashcards[index].flip
+    setFlashcards(allFlashcards)
+  }
+
   const handleSubmit = async () => {
     if (!text.trim()) {
       alert('Please enter some text to generate flashcards.')
@@ -45,6 +51,7 @@ export default function Generate() {
   
       const data = await response.json()
       setFlashcards(data)
+      setText('')
     } catch (error) {
       console.error('Error generating flashcards:', error)
       alert('An error occurred while generating flashcards. Please try again.')
@@ -125,16 +132,16 @@ export default function Generate() {
             {flashcards.map((flashcard, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 {flashcard.flip ? (
-                  <Card>
+                  <Card onClick={() => handleFlip(index)} sx={{ cursor: 'pointer' }}>
                     <CardContent>
-                      <Typography variant="h6" sx={{ mt: 2 }}>Answer</Typography>
+                      <Typography variant="h6" sx={{ mt: 2 }}>Answer:</Typography>
                       <Typography>{flashcard.back}</Typography>
                     </CardContent>
                   </Card>
                 ) : (
-                  <Card>
+                  <Card onClick={() => handleFlip(index)} sx={{ cursor: 'pointer' }}>
                     <CardContent>
-                      <Typography variant="h6" sx={{ mt: 2 }}>Question</Typography>
+                      <Typography variant="h6" sx={{ mt: 2 }}>Question:</Typography>
                       <Typography>{flashcard.front}</Typography>
                     </CardContent>
                   </Card>
