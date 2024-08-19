@@ -1,62 +1,82 @@
-'use client'
-import { useUser } from "@clerk/nextjs"
-import { useEffect, useState } from "react"
-import { doc, getDoc, collection, setDoc  } from "firebase/firestore"
-import { db } from "@/firebase"
-import { useRouter } from "next/navigation"
-import { Card, CardActionArea, CardContent, Container, Grid, Typography } from "@mui/material"
+import { useState } from 'react'
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+} from '@mui/material'
 
-export default function Flashcards() {
+export default function Flashcard() {
     const { isLoaded, isSignedIn, user } = useUser()
-    const [flashcardSets, setFlashcardSets] = useState([])
-    const [error, setError] = useState(null)
+    const [flashcards, setFlashcards] = useState([])
+    const [flipped, setFlipped] = useState({})
     const router = useRouter()
+
+    const searchParams = useSearchParams()
+    const search = searchParams.get('id')
+
+    const handleCardClick = (id) => {
+        setFlipped((prev) => ({
+          ...prev,
+          [id]: !prev[id],
+        }))
+      }
   
-    // ... (rest of the component)
     useEffect(() => {
         async function getFlashcards() {
           if (!user) return
           const docRef = doc(collection(db, 'users'), user.id)
-          try {
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                const collections = docSnap.data().flashcardSets || [];
-                setFlashcardSets(collections);
-            } else {
-                await setDoc(docRef, { flashcardSets: [] });
-            }
-        } catch (error) {
-            setError('Failed to fetch flashcards. Please try again later.')
-            console.error("Failed to fetch flashcards:", error);
-            // Optionally set an error state and display it
-        }
+          const docSnap = await getDoc(docRef)
+          if (docSnap.exists()) {
+            const collections = docSnap.data().flashcards || []
+            setFlashcards(collections)
+          } else {
+            await setDoc(docRef, { flashcards: [] })
+          }
         }
         getFlashcards()
       }, [user])
 
-      if (!isLoaded || !isSignedIn) {
-        return <div>Loading...</div> 
-    }
+      useEffect(() => {
+        async function getFlashcard() {
+          if (!search || !user) return
+      
+          const colRef = collection(doc(collection(db, 'users'), user.id), search)
+          const docs = await getDocs(colRef)
+          const flashcards = []
+          docs.forEach((doc) => {
+            flashcards.push({ id: doc.id, ...doc.data() })
+          })
+          setFlashcards(flashcards)
+        }
+        getFlashcard()
+      }, [search, user])
 
-        if (error) {
-        return <div>Error: {error}</div> // Display error message
-    }
-
-    const handleCardClick = (id) => {
-        router.push(`/flashcard?id=${id}`)
-    }
-
-    return (
-        <Container maxWidth="100vw">
+      return (
+        <Container maxWidth="md">
           <Grid container spacing={3} sx={{ mt: 4 }}>
-            {flashcardSets.map((flashcard, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
+            {flashcards.map((flashcard) => (
+              <Grid item xs={12} sm={6} md={4} key={flashcard.id}>
                 <Card>
-                  <CardActionArea onClick={() => handleCardClick(flashcard.name)}>
+                  <CardActionArea onClick={() => handleCardClick(flashcard.id)}>
                     <CardContent>
-                      <Typography variant="h6">
-                        {flashcard.name}
-                      </Typography>
+                      <Box sx={{ /* Styling for flip animation */ }}>
+                        <div>
+                          <div>
+                            <Typography variant="h5" component="div">
+                              {flashcard.front}
+                            </Typography>
+                          </div>
+                          <div>
+                            <Typography variant="h5" component="div">
+                              {flashcard.back}
+                            </Typography>
+                          </div>
+                        </div>
+                      </Box>
                     </CardContent>
                   </CardActionArea>
                 </Card>
