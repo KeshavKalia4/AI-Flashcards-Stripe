@@ -1,19 +1,31 @@
 'use client'
 
 import { useState } from 'react'
+import { useAuth } from '@clerk/nextjs'
 import {
   Container,
   TextField,
   Button,
   Typography,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Grid,
+  Card,
+  CardContent
 } from '@mui/material'
+import { db } from '../../firebase';
+import {collection, doc, getDocs, query, setDoc, deleteDoc, writeBatch, getDoc} from 'firebase/firestore'
 
 export default function Generate() {
   const [text, setText] = useState('')
   const [flashcards, setFlashcards] = useState([])
   const [setName, setSetName] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
+  const { isLoaded, userId, sessionId, getToken } = useAuth()
 
   const handleSubmit = async () => {
     if (!text.trim()) {
@@ -47,7 +59,8 @@ export default function Generate() {
     }
   
     try {
-      const userDocRef = doc(collection(db, 'users'), user.id)
+      console.log(db)
+      const userDocRef = doc(collection(db, 'users'), userId)
       const userDocSnap = await getDoc(userDocRef)
   
       const batch = writeBatch(db)

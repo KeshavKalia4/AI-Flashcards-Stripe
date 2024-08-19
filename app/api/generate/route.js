@@ -16,7 +16,14 @@ You should return in the following JSON format:
 `
 
 export async function POST(req) {
-    const openai = new OpenAI()
+    const openai = new OpenAI({
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: `${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+      defaultHeaders: {
+        "HTTP-Referer": `${process.env.NEXT_PUBLIC_SITE_URL}`,
+        "X-Title": `${process.env.NEXT_PUBLIC_SITE_NAME}`,
+      }
+    })
     const data = await req.text()
   
     const completion = await openai.chat.completions.create({
@@ -24,7 +31,7 @@ export async function POST(req) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: data },
         ],
-        model: 'gpt-4o',
+        model: 'meta-llama/llama-3.1-8b-instruct:free',
         response_format: { type: 'json_object' },
       })
     
