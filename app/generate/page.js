@@ -124,16 +124,24 @@ export default function Generate() {
           <Grid container spacing={2}>
             {flashcards.map((flashcard, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">Front:</Typography>
-                    <Typography>{flashcard.front}</Typography>
-                    <Typography variant="h6" sx={{ mt: 2 }}>Back:</Typography>
-                    <Typography>{flashcard.back}</Typography>
-                  </CardContent>
-                </Card>
+                {flashcard.flip ? (
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ mt: 2 }}>Answer</Typography>
+                      <Typography>{flashcard.back}</Typography>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ mt: 2 }}>Question</Typography>
+                      <Typography>{flashcard.front}</Typography>
+                    </CardContent>
+                  </Card>
+                )}
               </Grid>
-            ))}
+            ))
+          }    
           </Grid>
           {/* Save Flashcards button added here */}
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>

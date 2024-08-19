@@ -3,13 +3,14 @@ import OpenAI from 'openai'
 
 const systemPrompt = `
 You are a flashcard creator, you take in text and create multiple flashcards from it. Make sure to create exactly 10 flashcards.
-Both front and back should be one sentence long.
+Both front and back should be one sentence long. Return only the JSON and nothing else. The front should be in form of a question and the back should be its answer.
 You should return in the following JSON format:
 {
   "flashcards":[
     {
       "front": "Front of the card",
-      "back": "Back of the card"
+      "back": "Back of the card",
+      "flip": false
     }
   ]
 }
@@ -37,6 +38,7 @@ export async function POST(req) {
     
       // Parse the JSON response from the OpenAI API
       const flashcards = JSON.parse(completion.choices[0].message.content)
+      console.log(flashcards)
 
     // Return the flashcards as a JSON response
     return NextResponse.json(flashcards.flashcards)
